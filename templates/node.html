@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Mind map</title>
+        <meta charset="utf-8" />
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+                                                                                                               crossorigin="anonymous">
+        <style>
+            .search-suggestions {
+                position: absolute;
+                background-color: white;
+                border: 1px solid rgb(227, 227, 227);
+                width: 206.667px;
+            }
+
+            .search-suggestions > li:hover, .search-suggestions > li.active {
+                background-color: rgb(227, 227, 227);
+                cursor: pointer;
+            }
+        </style>
+    </head>
+
+    <body>
+        <input type="text" id="search_bar_input" style="display: none; width: 100%" />
+        <ul id="search_bar_results_container" class="list-unstyled search-suggestions" style="width: 100%">
+        </ul>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ title }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Last edited on {{ last_edit }}</h6>
+                <p class="card-text">
+                {{ body }}
+                </p>
+                <div id="links_container">
+                    {% for card in related %}
+                    <a href="/{{ card.seo_name }}" class="card-link">{{ card.title }}</a>
+                    {% endfor %}
+                </div>
+                <form onsubmit="create_link" id="create_link_form">
+                    <input type="text" id="add_link_input" placeholder="Add link" class="searchable" data-search-result-container="#create_link_results_container"
+                                                                                                     data-search-remote-url="" data-search-submit="add_link" data-search-format="format_node_title" autocomplete="off" />
+                    <ul id="create_link_results_container" class="list-unstyled search-suggestions">
+                    </ul>
+                </form>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            const searchable_inputs = document.getElementsByClassName("searchable");
+
+let last_search = "";
+
+function format_node_title(element, node) {
+    element.innerText = node.title;
+}
+
+function add_link(node) {
+    console.log("Adding a link to ", node);
+}
+
+for (const input of searchable_inputs) {
+    const container = document.querySelector(input.dataset.searchResultContainer);
+    let last_search = "";
+
+    input.onkeydown = function (e) {
+        if (e.key == "ArrowUp" || e.key == "ArrowDown") {
+            const element = container.querySelector("li.active");
+
+            let current_index = element ? getElementIndex(element) : -1;
+            if (e.key == "ArrowUp") current_index -= 1;
+            if (e.key == "ArrowDown") current_index += 1;
+
+            if (current_index < 0) current_index = 0;
+                if (current_index >= container.children.length - 1) current_index = container.children.length - 1;
+
+            const new_element = container.children[current_index];
+
+            if (element) element.classList.remove("active");
+            if (new_element) new_element.classList.add("active");
+            return false;
+        }
+        if (e.key == "Enter") {
+            let element = container.querySelector("li.active");
+            if (element == null) element = container.children[0];
+            let current_index = getElementIndex(element);
+
+            window[input.dataset.searchSubmit](JSON.parse(element.dataset.data));
+
+            return false;
+        }
+    }
+
+    input.onkeyup = function () {
+        if (last_search == input.value) return;
+        last_search = input.value;
+        let results = [];
+        for (let i = 0; i < input.value.length; i++) {
+                results.push({ id: i, title: input.value.substr(0, i + 1) });
+                }
+
+                container.innerHTML = "";
+
+                const format = window[input.dataset.searchFormat];
+                for (const result of results) {
+                const element = document.createElement("LI");
+                element.onclick = function () {
+                window[input.dataset.searchSubmit](JSON.parse(this.dataset.data));
+                };
+                element.dataset.data = JSON.stringify(result);
+                format(element, result);
+                container.appendChild(element);
+                }
+                };
+                input.onblur = function () {
+                setTimeout(function () {
+                container.innerHTML = '';
+                }, 100);
+                };
+                }
+
+                function getElementIndex(element) {
+                return Array.from(element.parentNode.children).indexOf(element);
+                }
+
+                window.onkeydown = function (e) {
+                if (e.target != document.body) return;
+                if (e.key == 'f') {
+                console.log("Opening search!");
+                }
+                };
+        </script>
+    </body>
+
+</html>

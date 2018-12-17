@@ -1,0 +1,30 @@
+{% extends "_layout" %}
+{% block content %}
+<form action="/search" method="GET">
+    <input class="form-control" type="search" name="q" placeholder="search for notes.." />
+</form>
+<div class="row">
+    <div class="col-md-8">
+        {% block inner_content %}{% endblock inner_content %}
+     </div>
+    <div class="col-md-4">
+        <h2>New note</h2>
+        <form action="/new_note" method="POST">
+            <div class="form-group">
+                <label for="note_title">Title</label>
+                <input type="text" class="form-control" id="note_title" name="title" />
+            </div>
+            <div class="form-group">
+                <label for="note_body">
+                    Contents
+                    (<a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">markdown</a>)
+                </label>
+                <textarea class="form-control" id="note_body" name="body">
+                </textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+</div>
+{% endblock content %}
+

@@ -1,0 +1,8 @@
+{% extends "_note_layout" %}
+{% block inner_content %}
+    <a href="/">Home</a>
+    <h2>{{ note.title }}</h2>
+    <p>
+        {{ note.body }}
+    </p>
+{% endblock inner_content %}

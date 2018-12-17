@@ -1,0 +1,12 @@
+{% extends "_login_layout" %}
+{% block title %}Mind map - Login{% endblock title %}
+{% block login %}
+<h2>Login</h2>
+{{error}}<br />
+<form method="POST" action="/login">
+    Username: <input type="text" name="username" value="{{username}}" /><br />
+    Password: <input type="password" name="password" value="" /><br />
+    <input type="submit" value="Log in" />
+</form>
+{% endblock login %}
+

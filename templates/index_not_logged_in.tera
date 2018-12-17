@@ -1,0 +1,2 @@
+{% extends "_login_layout" %}
+{% block title %}Mind map - Login{% endblock title %}

@@ -1,0 +1,14 @@
+{% extends "_layout" %}
+{% block content %}
+<form action="/search" method="GET">
+    <input class="form-control" type="search" name="q" placeholder="search for notes.." value="{{search}}" />
+</form>
+<a href="/">Back</a><br />
+<ul class="list-unstyled">
+    {% for result in results -%}
+    <li>
+        <a href="/n/{{ result.seo_name }}">{{ result.title }}</a>
+    </li>
+    {%- endfor %}
+</ul>
+{% endblock content %}

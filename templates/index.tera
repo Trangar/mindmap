@@ -1,0 +1,9 @@
+{% extends "_note_layout" %}
+{% block inner_content %}
+<h2>Top 10 notes</h2>
+<ul class="list-unstyled">
+    {% for note in top_10_notes -%}
+        <li><a href="/n/{{ note.seo_name }}">{{note.title}}</a></li>
+    {%- endfor %}
+</ul>
+{% endblock inner_content %}

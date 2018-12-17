@@ -1,0 +1,28 @@
+{% extends "_layout" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        {% block login %}
+        <h2>Login</h2>
+        <form method="POST" action="/login">
+            Username: <input type="text" name="username" /><br />
+            Password: <input type="password" name="password" value="" /><br />
+            <input type="submit" value="Log in" />
+        </form>
+        {% endblock login %}
+    </div>
+    <div class="col-md-6">
+        {% block register %}
+        <h2>Register</h2>
+        <form method="POST" action="/register">
+            Username: <input type="text" name="username" /><br />
+            Password: <input type="password" name="password" value="" /><br />
+            Repeat: <input type="password" name="repeat_password" value="" /><br />
+            <input type="submit" value="Register" />
+        </form>
+        {% endblock register %}
+    </div>
+</div>
+
+{% endblock content %}
+

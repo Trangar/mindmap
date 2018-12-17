@@ -1,0 +1,13 @@
+{% extends "_login_layout" %}
+{% block title %}Mind map - Register{% endblock title %}
+
+{% block register %}
+<h2>Register</h2>
+{{error}}<br />
+<form method="POST" action="/register">
+    Username: <input type="text" name="username" value="{{username}}" /><br />
+    Password: <input type="password" name="password" value="" /><br />
+    Repeat: <input type="password" name="repeat_password" value="" /><br />
+    <input type="submit" value="Register" />
+</form>
+{% endblock register %}
