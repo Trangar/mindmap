@@ -1,0 +1,21 @@
+{% extends "_note_layout" %}
+{% block inner_content %}
+<form action="/edit/{{ note.seo_name }}" method="POST">
+    <div class="d-flex">
+        <div class="p-2">
+            <a class="btn btn-primary fas fa-chevron-circle-left" href="/n/{{ note.seo_name }}"></a>
+        </div>
+        <div class="p-2 flex-fill">
+            <input type="text" class="form-control" value="{{ note.title }}" name="title" />
+        </div>
+        <div class="p-2">
+            <div class="btn-group">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <textarea name="body" class="form-control" rows="20">{{ note.body }}</textarea>
+</form>
+{% endblock inner_content %}

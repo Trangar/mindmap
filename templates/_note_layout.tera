@@ -1,8 +1,15 @@
 {% extends "_layout" %}
 {% block content %}
-<form action="/search" method="GET">
-    <input class="form-control" type="search" name="q" placeholder="search for notes.." />
-</form>
+<div class="d-flex">
+    <div class="p-2 flex-fill">
+        <form action="/search" method="GET">
+            <input class="form-control" type="search" name="q" placeholder="search for notes.." />
+        </form>
+    </div>
+    <div class="p-2">
+        <a href="/logout" class="btn btn-default btn-lg fas fa-sign-out-alt" title="Log out"></a>
+    </div>
+</div>
 <div class="row">
     <div class="col-md-8">
         {% block inner_content %}{% endblock inner_content %}
@@ -19,8 +26,7 @@
                     Contents
                     (<a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">markdown</a>)
                 </label>
-                <textarea class="form-control" id="note_body" name="body">
-                </textarea>
+                <textarea class="form-control" id="note_body" name="body"></textarea>
             </div>
             <button type="submit" class="btn btn-primary">Create</button>
         </form>

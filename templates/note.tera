@@ -1,8 +1,35 @@
 {% extends "_note_layout" %}
 {% block inner_content %}
-    <a href="/">Home</a>
-    <h2>{{ note.title }}</h2>
+    <div class="d-flex">
+        <div class="p-2">
+            <a class="btn btn-primary fas fa-home" href="/"></a>
+        </div>
+        <div class="p-2 flex-fill">
+            <h3>{{ note.title }}</h3>
+        </div>
+        <div class="p-2">
+            <div class="btn-group">
+                <a class="btn btn-info fas fa-history" href="/history/{{ note.seo_name }}"></a>
+                <a class="btn btn-success fas fa-pencil-alt" href="/edit/{{ note.seo_name }}"></a>
+            </div>
+        </div>
+    </div>
     <p>
-        {{ note.body }}
+        {{ note.body | markdown }}
     </p>
+    {% for link in links -%}
+        <a href="/link/{{ link.link.id }}/{{ link.note.seo_name}}" class="badge badge-secondary">
+            {{ link.note.title }}
+        </a>
+    {%- endfor %}
+    <form method="GET" action="/create_link/{{ note.seo_name }}">
+        <div class="d-flex">
+            <div class="p-2 flex-fill">
+                <input type="search" placeholder="New link" class="form-control" name="q" />
+            </div>
+            <div class="p-2">
+                <input type="submit" value="Search" class="btn btn-primary" />
+            </div>
+        </div>
+    </form>
 {% endblock inner_content %}

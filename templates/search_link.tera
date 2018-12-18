@@ -3,11 +3,12 @@
 <form action="/search" method="GET">
     <input class="form-control" type="search" name="q" placeholder="search for notes.." value="{{search}}" />
 </form>
-<a href="/">&laquo; Back</a><br />
+<a href="/n/{{ note.seo_name }}">&laquo; Back</a><br />
+<h2>Linking to {{ note.title }}</h2>
 <ul>
     {% for result in results -%}
     <li>
-        <a href="/n/{{ result.seo_name }}">{{ result.title }}</a>
+        <a href="/create_link/{{ note.seo_name }}/{{ result.seo_name }}">{{ result.title }}</a>
     </li>
     {%- endfor %}
 </ul>

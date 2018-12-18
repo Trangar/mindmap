@@ -1,0 +1,20 @@
+{% extends "_note_layout" %}
+{% block inner_content %}
+    <div class="d-flex">
+        <div class="p-2">
+            <a class="btn btn-primary fas fa-chevron-circle-left" href="/n/{{ note.seo_name }}"></a>
+        </div>
+        <div class="p-2 flex-fill">
+            <h3>{{ note.title }}</h3>
+        </div>
+    </div>
+    <ul class="list-unstyled">
+        {% for item in history -%}
+        <li>
+            <b>{{ item.created }}</b><br />
+            Title: {{ item.title }}<br />
+            body: {{ item.body }}
+        </li>
+        {%- endfor %}
+    </ul>
+{% endblock inner_content %}
