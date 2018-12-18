@@ -21,13 +21,13 @@ use rocket::request::Form;
 use rocket::response::Redirect;
 use rocket_contrib::databases::diesel::PgConnection;
 use rocket_contrib::templates::Template;
+use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
-use std::collections::HashMap;
 use uuid::Uuid;
 
 pub use crate::either::Either;
-pub use crate::note::{Note, NoteHistory, NoteLink, Link};
+pub use crate::note::{Link, Note, NoteHistory, NoteLink};
 pub use crate::user::User;
 // TODO: Move this to src/user_token.rs
 pub use crate::models::user_token::UserToken;
@@ -68,19 +68,24 @@ fn main() {
 
 use crate::filters::markdown_filter;
 mod filters {
-    use std::collections::HashMap;
-    use serde_json::Value;
     use pulldown_cmark::{html, Parser};
     use rocket_contrib::templates::tera::{Error, ErrorKind};
+    use serde_json::Value;
+    use std::collections::HashMap;
 
-    pub fn markdown_filter(v: Value, _data: HashMap<String, Value>) -> Result<Value, Error> {
+    pub fn markdown_filter<S: std::hash::BuildHasher>(
+        v: Value,
+        _data: HashMap<String, Value, S>,
+    ) -> Result<Value, Error> {
         if let Some(s) = v.as_str() {
             let parser = Parser::new(s);
             let mut html_buf = String::new();
             html::push_html(&mut html_buf, parser);
             Ok(Value::String(html_buf))
         } else {
-            Err(Error::from_kind(ErrorKind::Msg(String::from("Value is not a valid string"))))
+            Err(Error::from_kind(ErrorKind::Msg(String::from(
+                "Value is not a valid string",
+            ))))
         }
     }
 }
@@ -143,7 +148,12 @@ struct SearchResults {
 }
 
 #[get("/create_link/<seo_name>?<q>")]
-fn search_note_link(conn: MindmapDB, user: User, seo_name: String, q: String) -> Result<Either<Template, Redirect>, failure::Error> {
+fn search_note_link(
+    conn: MindmapDB,
+    user: User,
+    seo_name: String,
+    q: String,
+) -> Result<Either<Template, Redirect>, failure::Error> {
     match Note::load_by_seo_name(&conn, &seo_name, user.id)? {
         Some(note) => {
             let mut query = SearchQuery::default();
@@ -158,30 +168,42 @@ fn search_note_link(conn: MindmapDB, user: User, seo_name: String, q: String) ->
 
             let results = Note::search(&conn, query, user.id)?;
 
-            let results = SearchLinkResults { search: q, results, note };
+            let results = SearchLinkResults {
+                search: q,
+                results,
+                note,
+            };
             Ok(Either::Left(Template::render("search_link", &results)))
         }
-        None => Ok(Either::Right(Redirect::to("/")))
+        None => Ok(Either::Right(Redirect::to("/"))),
     }
 }
 #[get("/create_link/<left_seo_name>/<right_seo_name>")]
-fn create_note_link(conn: MindmapDB, user: User, left_seo_name: String, right_seo_name: String) -> Result<Redirect, failure::Error> {
+fn create_note_link(
+    conn: MindmapDB,
+    user: User,
+    left_seo_name: String,
+    right_seo_name: String,
+) -> Result<Redirect, failure::Error> {
     match (
         Note::load_by_seo_name(&conn, &left_seo_name, user.id)?,
-        Note::load_by_seo_name(&conn, &right_seo_name, user.id)?
+        Note::load_by_seo_name(&conn, &right_seo_name, user.id)?,
     ) {
         (Some(left), Some(right)) => {
             left.create_link_to(&conn, &right)?;
             Ok(Redirect::to(format!("/n/{}", left.seo_name)))
         }
-        (_, _) => {
-            Ok(Redirect::to("/"))
-        }
+        (_, _) => Ok(Redirect::to("/")),
     }
 }
 
 #[get("/link/<id>/<seo_name>")]
-fn follow_link(conn: MindmapDB, _user: User, id: String, seo_name: String) -> Result<Redirect, failure::Error> {
+fn follow_link(
+    conn: MindmapDB,
+    _user: User,
+    id: String,
+    seo_name: String,
+) -> Result<Redirect, failure::Error> {
     let id = Uuid::parse_str(&id)?;
     let link = Link { id };
     link.increase_click_count(&conn)?;
@@ -306,10 +328,7 @@ fn view_note_history(
     match Note::load_by_seo_name(&conn, seo_name, user.id)? {
         Some(note) => {
             let history = note.load_history(&conn)?;
-            let model = ViewNoteHistoryModel {
-                note,
-                history,
-            };
+            let model = ViewNoteHistoryModel { note, history };
             Ok(Either::Left(Template::render("note_history", &model)))
         }
         None => Ok(Either::Right(Redirect::to("/"))),
@@ -390,7 +409,7 @@ fn register_submit(
             cookies.add_private(Cookie::new("UID", user.id.to_string()));
             cookies.add_private(Cookie::new("TID", token.id.to_string()));
             Either::Right(Redirect::to("/"))
-        },
+        }
         Err(e) => {
             let render_model = RegisterRenderModel {
                 username: register.username.clone(),

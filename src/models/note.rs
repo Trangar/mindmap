@@ -79,13 +79,14 @@ impl Note {
         conn: &diesel::PgConnection,
         id: Uuid,
     ) -> Result<Option<Note>, failure::Error> {
-        note::table.find(id)
+        note::table
+            .find(id)
             .get_result(conn)
             .optional()
             .map_err(Into::into)
     }
 
-     pub fn load_by_seo_name(
+    pub fn load_by_seo_name(
         conn: &diesel::PgConnection,
         name: &str,
         user_id: Uuid,

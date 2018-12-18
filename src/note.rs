@@ -97,7 +97,6 @@ impl Note {
         DatabaseNote::load_by_id(conn, id).map(|o| o.map(Into::into))
     }
 
-
     pub fn load_by_seo_name(
         conn: &diesel::PgConnection,
         name: &str,
@@ -136,12 +135,11 @@ impl Note {
             if seo_name == self.seo_name {
                 break;
             }
-            if let Some(_) = DatabaseNote::load_by_seo_name(conn, &seo_name, self.user_id)? {
-                seo_name = format!("{}_{}", seo_name_base, counter);
-                counter += 1;
-            } else {
+            if DatabaseNote::load_by_seo_name(conn, &seo_name, self.user_id)?.is_none() {
                 break;
             }
+            seo_name = format!("{}_{}", seo_name_base, counter);
+            counter += 1;
         }
 
         let result = DatabaseNote::update(conn, self.id, &seo_name, new_title, new_body)?;
@@ -149,11 +147,21 @@ impl Note {
         Ok(())
     }
 
-    pub fn load_history(&self, conn: &diesel::PgConnection) -> Result<Vec<NoteHistory>, failure::Error> {
-        Ok(DatabaseNote::load_history(conn, self.id)?.into_iter().map(Into::into).collect())
+    pub fn load_history(
+        &self,
+        conn: &diesel::PgConnection,
+    ) -> Result<Vec<NoteHistory>, failure::Error> {
+        Ok(DatabaseNote::load_history(conn, self.id)?
+            .into_iter()
+            .map(Into::into)
+            .collect())
     }
 
-    pub fn create_link_to(&self, conn: &diesel::PgConnection, other: &Note) -> Result<(), failure::Error> {
+    pub fn create_link_to(
+        &self,
+        conn: &diesel::PgConnection,
+        other: &Note,
+    ) -> Result<(), failure::Error> {
         DatabaseNoteLink::create(conn, self.id, other.id)?;
         Ok(())
     }
@@ -171,4 +179,3 @@ impl Note {
         Ok(links.into_iter().map(Into::into).collect())
     }
 }
-
