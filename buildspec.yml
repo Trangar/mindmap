@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - curl https://sh.rustup.rs -sSf > rustup.sh
+      - chmod +x rustup.sh
+      - ./rustup.sh -y --default-toolchain nightly
+  build:
+    commands:
+      - . ~/.cargo/env
+      - cargo test
+      - cargo build --release
+artifacts:
+  files:
+    target/release/*
+cache:
+  paths:
+    ~/.cargo
+
