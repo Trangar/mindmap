@@ -1,0 +1,2 @@
+[global.databases]
+mindmap_db = { url = "postgres://<user>:<password>@<host>/<database>" }
