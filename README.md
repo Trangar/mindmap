@@ -19,3 +19,16 @@ To run the project:
 ## Configuration
 
 To configure the website, see [Configuring Rocket.toml](https://rocket.rs/guide/configuration/#rockettoml).
+
+## Publishing
+
+To publish this tool somewhere, copy the following items to the server:
+- static
+- templates
+- Rocket.toml
+
+Make sure to run `cargo build --release`, then copy `target/release/mindmap_server` to your server.
+
+Configure the database by having a valid `.env` file, and running `diesel migration run`.
+
+On the server, run the `mindmap_server` executable as a service or in a detached shell. 
