@@ -111,7 +111,10 @@ impl Note {
         body: &str,
         user_id: Uuid,
     ) -> Result<Note, failure::Error> {
-        let seo_name_base = slugify(title);
+        let mut seo_name_base = slugify(title);
+        if seo_name_base.is_empty() {
+            seo_name_base = "-".to_owned();
+        }
         let mut seo_name = seo_name_base.clone();
         let mut counter = 1;
         while let Some(_) = DatabaseNote::load_by_seo_name(conn, &seo_name, user_id)? {
@@ -128,7 +131,10 @@ impl Note {
         new_title: &str,
         new_body: &str,
     ) -> Result<(), failure::Error> {
-        let seo_name_base = slugify(new_title);
+        let mut seo_name_base = slugify(new_title);
+        if seo_name_base.is_empty() {
+            seo_name_base = "-".to_owned();
+        }
         let mut seo_name = seo_name_base.clone();
         let mut counter = 1;
         loop {
