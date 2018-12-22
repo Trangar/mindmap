@@ -6,39 +6,8 @@
         <meta charset="utf-8" />
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
-        <style>
-            .search-suggestions {
-                position: absolute;
-                background-color: white;
-                border: 1px solid rgb(227, 227, 227);
-                width: 206.667px;
-            }
-
-            .search-suggestions > li:hover, .search-suggestions > li.active {
-                background-color: rgb(227, 227, 227);
-                cursor: pointer;
-            }
-
-            .github-corner:hover .octo-arm {
-                animation: octocat-wave 560ms ease-in-out;
-            }
-            @keyframes octocat-wave {
-                0%, 100% {
-                    transform: rotate(0);
-                }
-                20%, 60% { 
-                    transform: rotate(-25deg);
-                }
-                40%, 80% {
-                    transform: rotate(10deg);
-                }
-            }
-            @media (max-width:700px) {
-                .github-corner {
-                    display: none;
-                }
-            }
-        </style>
+        <link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet">
+        <link href="/style.css" rel="stylesheet">
     </head>
 
     <body>
@@ -52,6 +21,20 @@
         <div class="container">
             {% block content %}{% endblock content %}
         </div>
+
+
+        <footer class="footer">
+            <div class="container">
+                <span class="text-muted">
+                    Developed by <a href="https://trangar.com" target="blank">Trangar</a>.
+                    Like what I'm doing?
+                </span>
+                <a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/trangar">
+                    <img src="https://www.buymeacoffee.com/assets/img/BMC-btn-logo.svg" alt="Buy me a coffee">
+                    <span style="margin-left:5px">Buy me a coffee</span>
+                </a>
+            </div>
+        </footer>
     </body>
 </html>
 

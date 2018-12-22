@@ -20,6 +20,7 @@ use rocket::http::{Cookie, Cookies};
 use rocket::request::Form;
 use rocket::response::Redirect;
 use rocket_contrib::databases::diesel::PgConnection;
+use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -79,6 +80,10 @@ fn main() {
                 view_note,
                 view_note_history,
             ],
+        )
+        .mount(
+            "/",
+            StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static")),
         )
         .launch();
 }
