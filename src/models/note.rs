@@ -107,7 +107,7 @@ impl Note {
         search_query: crate::SearchQuery,
         user_id: Uuid,
     ) -> Result<Vec<Note>, failure::Error> {
-        fn sanitize(s: &str) -> String {
+        fn sanitize(s: String) -> String {
             let mut result = String::with_capacity(s.len());
             for c in s.chars() {
                 if c.is_alphanumeric() {

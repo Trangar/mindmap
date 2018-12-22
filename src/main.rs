@@ -37,6 +37,23 @@ pub use crate::models::user_token::UserToken;
 #[database("mindmap_db")]
 pub struct MindmapDB(PgConnection);
 
+fn replace_html_tags(s: &str) -> String {
+    let mut output = String::with_capacity(s.len());
+    for c in s.chars() {
+        // Taken from https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet#RULE_.231_-_HTML_Escape_Before_Inserting_Untrusted_Data_into_HTML_Element_Content
+        match c {
+            '&' => output += "&amp;",
+            '<' => output += "&lt;",
+            '>' => output += "&gt;",
+            '"' => output += "&quot;",
+            '\'' => output += "&#x27;",
+            '/' => output += "&#x2F;",
+            c => output.push(c),
+        }
+    }
+    output
+}
+
 fn main() {
     rocket::ignite()
         .attach(MindmapDB::fairing())
@@ -129,15 +146,18 @@ fn search(conn: MindmapDB, user: User, q: String) -> Result<Template, failure::E
 
     for part in q.split(' ') {
         if Some("-") == part.get(..1) {
-            query.excludes.push(&part[1..])
+            query.excludes.push(replace_html_tags(&part[1..]))
         } else {
-            query.queries.push(part);
+            query.queries.push(replace_html_tags(part));
         }
     }
 
     let results = Note::search(&conn, query, user.id)?;
 
-    let results = SearchResults { search: q, results };
+    let results = SearchResults {
+        search: replace_html_tags(q.as_str()),
+        results,
+    };
     Ok(Template::render("search", &results))
 }
 
@@ -160,16 +180,16 @@ fn search_note_link(
 
             for part in q.split(' ') {
                 if Some("-") == part.get(..1) {
-                    query.excludes.push(&part[1..])
+                    query.excludes.push(replace_html_tags(&part[1..]))
                 } else {
-                    query.queries.push(part);
+                    query.queries.push(replace_html_tags(part));
                 }
             }
 
             let results = Note::search(&conn, query, user.id)?;
 
             let results = SearchLinkResults {
-                search: q,
+                search: replace_html_tags(q.as_str()),
                 results,
                 note,
             };
@@ -211,9 +231,9 @@ fn follow_link(
 }
 
 #[derive(Debug, Default)]
-pub struct SearchQuery<'a> {
-    pub queries: Vec<&'a str>,
-    pub excludes: Vec<&'a str>,
+pub struct SearchQuery {
+    pub queries: Vec<String>,
+    pub excludes: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -227,7 +247,12 @@ struct SearchLinkResults {
 
 #[post("/new_note", data = "<data>")]
 fn new_note(conn: MindmapDB, user: User, data: Form<NewNote>) -> Result<Redirect, failure::Error> {
-    let note = Note::create(&conn, &data.title, &data.body, user.id)?;
+    let note = Note::create(
+        &conn,
+        &replace_html_tags(&data.title),
+        &replace_html_tags(&data.body),
+        user.id,
+    )?;
     Ok(Redirect::to(format!("/n/{}", note.seo_name)))
 }
 
@@ -300,7 +325,11 @@ fn edit_note_submit(
     let seo_name = get_seo_name_from_path(&seo_name);
     match Note::load_by_seo_name(&conn, seo_name, user.id)? {
         Some(mut note) => {
-            note.update(&conn, &data.title, &data.body)?;
+            note.update(
+                &conn,
+                &replace_html_tags(&data.title),
+                &replace_html_tags(&data.body),
+            )?;
             Ok(Either::Right(Redirect::to(format!("/n/{}", note.seo_name))))
         }
         None => Ok(Either::Right(Redirect::to("/"))),
@@ -401,8 +430,8 @@ fn register_submit(
     }
     match User::attempt_register(
         &conn,
-        register.username.as_str(),
-        register.password.as_str(),
+        &replace_html_tags(&register.username),
+        &replace_html_tags(&register.password),
         &ip.ip().to_string(),
     ) {
         Ok((user, token)) => {
