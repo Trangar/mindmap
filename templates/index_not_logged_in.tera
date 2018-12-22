@@ -1,2 +1,66 @@
-{% extends "_login_layout" %}
+{% extends "_layout" %}
 {% block title %}Mind map - Login{% endblock title %}
+{% block content %}
+    <h1>MindMap</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <p>
+                MindMap is a tool for people where they can use associative memory techniques to store information they have.
+            <p>
+            <p>
+                Information is stored in small "notes". Each note can be linked to other notes.
+            </p>
+            <img src="/intro_1.png" alt="Note preview" style="max-width: 100%" />
+            <p>
+                This way, you can easily find back informations if you don't remember what you were looking for, but you do remember what information was related to it.
+            </p>
+            <p>
+                This project is open-source. For more information, click the github link in the top-right!
+            </p>
+        </div>
+        <div class="col-md-4">
+            <h2>Login</h2>
+            <form method="POST" action="/login" class="form-group">
+                <div class="form-group row">
+                    <label for="login_username" class="col-md-4 col-form-label">Username</label>
+                    <div class="col-md-8">
+                        <input type="text" name="username" class="form-control" id="login_username" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="login_password" class="col-md-4 col-form-label">Password</label>
+                    <div class="col-md-8">
+                        <input type="password" name="password" class="form-control" id="login_password" />
+                    </div>
+                </div>
+                <div class="col-md-8 offset-md-4">
+                    <input class="btn btn-primary" type="submit" value="Log in" />
+                </div>
+            </form>
+            <h2>Register</h2>
+            <form method="POST" action="/register" class="form-group">
+                <div class="form-group row">
+                    <label for="register_username" class="col-md-4 col-form-label">Username</label>
+                    <div class="col-md-8">
+                        <input type="text" name="username" class="form-control" id="register_username" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="register_password" class="col-md-4 col-form-label">Password</label>
+                    <div class="col-md-8">
+                        <input type="password" name="password" class="form-control" id="register_password" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="register_repeat_password" class="col-md-4 col-form-label">Repeat</label>
+                    <div class="col-md-8">
+                        <input type="password" name="repeat_password" class="form-control" id="register_repeat_password" />
+                    </div>
+                </div>
+                <div class="col-md-8 offset-md-4">
+                    <input class="btn btn-primary" type="submit" value="Register" />
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

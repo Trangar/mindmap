@@ -4,21 +4,50 @@
     <div class="col-md-6">
         {% block login %}
         <h2>Login</h2>
-        <form method="POST" action="/login">
-            Username: <input type="text" name="username" /><br />
-            Password: <input type="password" name="password" value="" /><br />
-            <input type="submit" value="Log in" />
+        <form method="POST" action="/login" class="form-group">
+            <div class="form-group row">
+                <label for="login_username" class="col-md-4 col-form-label">Username</label>
+                <div class="col-md-8">
+                    <input type="text" name="username" class="form-control" id="login_username" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="login_password" class="col-md-4 col-form-label">Password</label>
+                <div class="col-md-8">
+                    <input type="password" name="password" class="form-control" id="login_password" />
+                </div>
+            </div>
+            <div class="col-md-8 offset-md-4">
+                <input class="btn btn-primary" type="submit" value="Log in" />
+            </div>
         </form>
         {% endblock login %}
     </div>
     <div class="col-md-6">
         {% block register %}
         <h2>Register</h2>
-        <form method="POST" action="/register">
-            Username: <input type="text" name="username" /><br />
-            Password: <input type="password" name="password" value="" /><br />
-            Repeat: <input type="password" name="repeat_password" value="" /><br />
-            <input type="submit" value="Register" />
+        <form method="POST" action="/register" class="form-group">
+            <div class="form-group row">
+                <label for="register_username" class="col-md-4 col-form-label">Username</label>
+                <div class="col-md-8">
+                    <input type="text" name="username" class="form-control" id="register_username" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="register_password" class="col-md-4 col-form-label">Password</label>
+                <div class="col-md-8">
+                    <input type="password" name="password" class="form-control" id="register_password" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="register_repeat_password" class="col-md-4 col-form-label">Repeat</label>
+                <div class="col-md-8">
+                    <input type="password" name="repeat_password" class="form-control" id="register_repeat_password" />
+                </div>
+            </div>
+            <div class="col-md-8 offset-md-4">
+                <input class="btn btn-primary" type="submit" value="Register" />
+            </div>
         </form>
         {% endblock register %}
     </div>

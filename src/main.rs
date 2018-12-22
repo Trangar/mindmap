@@ -81,10 +81,7 @@ fn main() {
                 view_note_history,
             ],
         )
-        .mount(
-            "/",
-            StaticFiles::from(concat!(env!("CARGO_MANIFEST_DIR"), "/static")),
-        )
+        .mount("/", StaticFiles::from("static"))
         .launch();
 }
 

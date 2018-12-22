@@ -2,11 +2,25 @@
 {% block title %}Mind map - Login{% endblock title %}
 {% block login %}
 <h2>Login</h2>
-{{error}}<br />
-<form method="POST" action="/login">
-    Username: <input type="text" name="username" value="{{username}}" /><br />
-    Password: <input type="password" name="password" value="" /><br />
-    <input type="submit" value="Log in" />
+<div class="alert alert-danger" role="alert">
+    {{error}}
+</div>
+<form method="POST" action="/login" class="form-group">
+    <div class="form-group row">
+        <label for="login_username" class="col-md-4 col-form-label">Username</label>
+        <div class="col-md-8">
+            <input type="text" name="username" class="form-control" id="login_username" value="{{username}}"/>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="login_password" class="col-md-4 col-form-label">Password</label>
+        <div class="col-md-8">
+            <input type="password" name="password" class="form-control" id="login_password" />
+        </div>
+    </div>
+    <div class="col-md-8 offset-md-4">
+        <input class="btn btn-primary" type="submit" value="Log in" />
+    </div>
 </form>
 {% endblock login %}
 
