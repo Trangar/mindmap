@@ -53,24 +53,6 @@ impl<'v> FromFormValue<'v> for HtmlSafeString {
     }
 }
 
-#[deprecated(note = "Use HtmlSafeString instead")]
-fn replace_html_tags(s: &str) -> String {
-    let mut output = String::with_capacity(s.len());
-    for c in s.chars() {
-        // Taken from https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet#RULE_.231_-_HTML_Escape_Before_Inserting_Untrusted_Data_into_HTML_Element_Content
-        match c {
-            '&' => output += "&amp;",
-            '<' => output += "&lt;",
-            '>' => output += "&gt;",
-            '"' => output += "&quot;",
-            '\'' => output += "&#x27;",
-            '/' => output += "&#x2F;",
-            c => output.push(c),
-        }
-    }
-    output
-}
-
 fn main() {
     rocket::ignite()
         .attach(MindmapDB::fairing())
