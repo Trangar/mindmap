@@ -2,7 +2,7 @@
 authors = ["Victor Koenders <victor.koenders@gmail.com>"]
 edition = "2018"
 name = "mindmap_server"
-version = "0.1.0"
+version = "0.2.0"
 
 [dependencies]
 dotenv = "0.13.0"

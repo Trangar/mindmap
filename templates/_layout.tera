@@ -26,7 +26,8 @@
         <footer class="footer">
             <div class="container">
                 <span class="text-muted">
-                    Developed by <a href="https://trangar.com" target="blank">Trangar</a>.
+                    Developed by <a href="https://trangar.com" target="blank">Trangar</a> |
+                    Version {{ current_version() }} |
                     Like what I'm doing?
                 </span>
                 <a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/trangar">

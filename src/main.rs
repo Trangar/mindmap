@@ -61,7 +61,12 @@ fn main() {
     rocket::ignite()
         .attach(MindmapDB::fairing())
         .attach(Template::custom(|engine| {
-            engine.tera.register_filter("markdown", markdown_filter);
+            engine
+                .tera
+                .register_filter("markdown", crate::filters::markdown_filter);
+            engine
+                .tera
+                .register_function("current_version", Box::new(crate::filters::current_version));
         }))
         .mount(
             "/",
@@ -88,7 +93,6 @@ fn main() {
         .launch();
 }
 
-use crate::filters::markdown_filter;
 mod filters {
     use pulldown_cmark::{html, Parser};
     use rocket_contrib::templates::tera::{Error, ErrorKind};
@@ -109,6 +113,12 @@ mod filters {
                 "Value is not a valid string",
             ))))
         }
+    }
+
+    pub fn current_version<S: std::hash::BuildHasher>(
+        _: HashMap<String, Value, S>,
+    ) -> Result<Value, Error> {
+        Ok(Value::String(env!("CARGO_PKG_VERSION").to_owned()))
     }
 }
 
