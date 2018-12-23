@@ -7,7 +7,7 @@ use std::net::SocketAddr;
 
 use crate::either::Either;
 use crate::user::User;
-use crate::{replace_html_tags, MindmapDB};
+use crate::{HtmlSafeString, MindmapDB};
 
 #[get("/", rank = 2)]
 pub fn index_not_logged_in() -> Template {
@@ -31,10 +31,11 @@ pub fn login_submit(
     mut cookies: Cookies,
     login: Form<LoginSubmitModel>,
 ) -> Either<Template, Redirect> {
+    let login = login.into_inner();
     match User::attempt_login(
         &conn,
-        login.username.as_str(),
-        login.password.as_str(),
+        &login.username,
+        &login.password,
         &ip.ip().to_string(),
     ) {
         Ok((user, token)) => {
@@ -44,7 +45,7 @@ pub fn login_submit(
         }
         Err(e) => {
             let render_model = LoginRenderModel {
-                username: login.username.clone(),
+                username: login.username.get(),
                 error: e.to_string(),
             };
             Either::Left(Template::render("login", &render_model))
@@ -59,17 +60,19 @@ pub fn register_submit(
     mut cookies: Cookies,
     register: Form<RegisterSubmitModel>,
 ) -> Either<Template, Redirect> {
+    let register = register.into_inner();
+
     if register.password != register.repeat_password {
         let render_model = RegisterRenderModel {
-            username: register.username.clone(),
+            username: register.username.get(),
             error: String::from("Passwords don't match"),
         };
         return Either::Left(Template::render("register", &render_model));
     }
     match User::attempt_register(
         &conn,
-        &replace_html_tags(&register.username),
-        &replace_html_tags(&register.password),
+        &register.username,
+        &register.password,
         &ip.ip().to_string(),
     ) {
         Ok((user, token)) => {
@@ -79,7 +82,7 @@ pub fn register_submit(
         }
         Err(e) => {
             let render_model = RegisterRenderModel {
-                username: register.username.clone(),
+                username: register.username.get(),
                 error: e.to_string(),
             };
             Either::Left(Template::render("register", &render_model))
@@ -89,7 +92,7 @@ pub fn register_submit(
 
 #[derive(FromForm)]
 pub struct LoginSubmitModel {
-    pub username: String,
+    pub username: HtmlSafeString,
     pub password: String,
 }
 
@@ -101,7 +104,7 @@ pub struct LoginRenderModel {
 
 #[derive(FromForm)]
 pub struct RegisterSubmitModel {
-    pub username: String,
+    pub username: HtmlSafeString,
     pub password: String,
     pub repeat_password: String,
 }

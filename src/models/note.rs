@@ -138,7 +138,7 @@ impl Note {
         search_query: SearchQuery,
         user_id: Uuid,
     ) -> Result<Vec<Note>, failure::Error> {
-        fn sanitize(s: String) -> String {
+        fn sanitize(s: &str) -> String {
             let mut result = String::with_capacity(s.len());
             for c in s.chars() {
                 if c.is_alphanumeric() {

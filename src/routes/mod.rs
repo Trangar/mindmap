@@ -46,7 +46,7 @@ fn index(
     let notes = Note::load_paged(&conn, user.id, (page - 1) * count, count)?;
     let total_notes = Note::count_all(&conn, user.id)?;
     let model = IndexModel {
-        notes: notes,
+        notes,
         page,
         total_pages: (total_notes / count) + 1,
         notes_per_page: count,

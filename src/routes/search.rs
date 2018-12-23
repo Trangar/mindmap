@@ -1,26 +1,26 @@
 use crate::either::Either;
 use crate::note::Note;
 use crate::user::User;
-use crate::{replace_html_tags, MindmapDB};
+use crate::{HtmlSafeString, MindmapDB};
 use rocket::response::Redirect;
 use rocket_contrib::templates::Template;
 
 #[get("/search?<q>")]
-pub fn search(conn: MindmapDB, user: User, q: String) -> Result<Template, failure::Error> {
+pub fn search(conn: MindmapDB, user: User, q: HtmlSafeString) -> Result<Template, failure::Error> {
     let mut query = SearchQuery::default();
 
     for part in q.split(' ') {
         if Some("-") == part.get(..1) {
-            query.excludes.push(replace_html_tags(&part[1..]))
+            query.excludes.push(&part[1..])
         } else {
-            query.queries.push(replace_html_tags(part));
+            query.queries.push(part);
         }
     }
 
     let results = Note::search(&conn, query, user.id)?;
 
     let results = SearchResults {
-        search: replace_html_tags(q.as_str()),
+        search: q.get(),
         results,
     };
     Ok(Template::render("search", &results))
@@ -31,7 +31,7 @@ pub fn search_for_link(
     conn: MindmapDB,
     user: User,
     seo_name: String,
-    q: String,
+    q: HtmlSafeString,
 ) -> Result<Either<Template, Redirect>, failure::Error> {
     match Note::load_by_seo_name(&conn, &seo_name, user.id)? {
         Some(note) => {
@@ -39,16 +39,16 @@ pub fn search_for_link(
 
             for part in q.split(' ') {
                 if Some("-") == part.get(..1) {
-                    query.excludes.push(replace_html_tags(&part[1..]))
+                    query.excludes.push(&part[1..])
                 } else {
-                    query.queries.push(replace_html_tags(part));
+                    query.queries.push(part);
                 }
             }
 
             let results = Note::search(&conn, query, user.id)?;
 
             let results = SearchLinkResults {
-                search: replace_html_tags(q.as_str()),
+                search: q.get(),
                 results,
                 note,
             };
@@ -65,9 +65,9 @@ struct SearchResults {
 }
 
 #[derive(Debug, Default)]
-pub struct SearchQuery {
-    pub queries: Vec<String>,
-    pub excludes: Vec<String>,
+pub struct SearchQuery<'a> {
+    pub queries: Vec<&'a str>,
+    pub excludes: Vec<&'a str>,
 }
 
 #[derive(Serialize)]

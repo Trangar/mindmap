@@ -18,6 +18,8 @@ pub mod schema;
 pub mod tera_utils;
 pub mod user;
 
+use rocket::http::RawStr;
+use rocket::request::FromFormValue;
 use rocket_contrib::databases::diesel::PgConnection;
 use rocket_contrib::serve::StaticFiles;
 use rocket_contrib::templates::Template;
@@ -27,6 +29,31 @@ use rocket_contrib::templates::Template;
 #[database("mindmap_db")]
 pub struct MindmapDB(PgConnection);
 
+#[derive(Debug)]
+pub struct HtmlSafeString(String);
+
+impl HtmlSafeString {
+    pub fn get(self) -> String {
+        self.0
+    }
+}
+
+impl std::ops::Deref for HtmlSafeString {
+    type Target = str;
+    fn deref(&self) -> &str {
+        self.0.as_str()
+    }
+}
+
+impl<'v> FromFormValue<'v> for HtmlSafeString {
+    type Error = &'v RawStr;
+
+    fn from_form_value(form_value: &'v RawStr) -> Result<HtmlSafeString, &'v RawStr> {
+        Ok(HtmlSafeString(form_value.html_escape().to_string()))
+    }
+}
+
+#[deprecated(note = "Use HtmlSafeString instead")]
 fn replace_html_tags(s: &str) -> String {
     let mut output = String::with_capacity(s.len());
     for c in s.chars() {
