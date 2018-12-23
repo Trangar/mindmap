@@ -7,7 +7,7 @@ use rocket_contrib::templates::Template;
 use std::path::PathBuf;
 
 #[get("/history/<seo_name..>")]
-pub fn view_note_history(
+pub fn view(
     conn: MindmapDB,
     user: User,
     seo_name: PathBuf,

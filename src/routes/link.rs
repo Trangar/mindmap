@@ -6,7 +6,7 @@ use crate::user::User;
 use crate::MindmapDB;
 
 #[get("/create_link/<left_seo_name>/<right_seo_name>")]
-pub fn create_note_link(
+pub fn create(
     conn: MindmapDB,
     user: User,
     left_seo_name: String,
@@ -25,7 +25,7 @@ pub fn create_note_link(
 }
 
 #[get("/link/<id>/<seo_name>")]
-pub fn follow_link(
+pub fn follow(
     conn: MindmapDB,
     _user: User,
     id: String,

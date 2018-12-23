@@ -52,20 +52,6 @@ pub fn login_submit(
     }
 }
 
-#[derive(FromForm)]
-pub struct LoginSubmitModel {
-    pub username: String,
-    pub password: String,
-}
-
-#[derive(Default, Serialize)]
-pub struct LoginRenderModel {
-    pub username: String,
-    pub error: String,
-}
-
-// Register logic
-
 #[post("/register", data = "<register>")]
 pub fn register_submit(
     ip: SocketAddr,
@@ -99,6 +85,18 @@ pub fn register_submit(
             Either::Left(Template::render("register", &render_model))
         }
     }
+}
+
+#[derive(FromForm)]
+pub struct LoginSubmitModel {
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(Default, Serialize)]
+pub struct LoginRenderModel {
+    pub username: String,
+    pub error: String,
 }
 
 #[derive(FromForm)]

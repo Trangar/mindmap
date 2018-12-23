@@ -26,14 +26,8 @@ pub fn search(conn: MindmapDB, user: User, q: String) -> Result<Template, failur
     Ok(Template::render("search", &results))
 }
 
-#[derive(Serialize)]
-struct SearchResults {
-    pub search: String,
-    pub results: Vec<Note>,
-}
-
 #[get("/create_link/<seo_name>?<q>")]
-pub fn search_note_link(
+pub fn search_for_link(
     conn: MindmapDB,
     user: User,
     seo_name: String,
@@ -62,6 +56,12 @@ pub fn search_note_link(
         }
         None => Ok(Either::Right(Redirect::to("/"))),
     }
+}
+
+#[derive(Serialize)]
+struct SearchResults {
+    pub search: String,
+    pub results: Vec<Note>,
 }
 
 #[derive(Debug, Default)]

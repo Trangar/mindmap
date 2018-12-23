@@ -10,29 +10,6 @@ use crate::note::{Note, NoteLink};
 use crate::user::User;
 use crate::{replace_html_tags, MindmapDB};
 
-#[post("/new_note", data = "<data>")]
-pub fn new_note(
-    conn: MindmapDB,
-    user: User,
-    data: Form<NewNote>,
-) -> Result<Redirect, failure::Error> {
-    let note = Note::create(
-        &conn,
-        &replace_html_tags(&data.title),
-        &replace_html_tags(&data.body),
-        user.id,
-    )?;
-    Ok(Redirect::to(format!("/n/{}", note.seo_name)))
-}
-
-#[derive(FromForm)]
-pub struct NewNote {
-    pub title: String,
-    pub body: String,
-}
-
-// View note
-
 pub fn get_seo_name_from_path(p: &Path) -> &str {
     let mut first = p;
     while let Some(parent) = first.parent() {
@@ -44,8 +21,19 @@ pub fn get_seo_name_from_path(p: &Path) -> &str {
     first.to_str().unwrap()
 }
 
+#[post("/new_note", data = "<data>")]
+pub fn new(conn: MindmapDB, user: User, data: Form<NewNote>) -> Result<Redirect, failure::Error> {
+    let note = Note::create(
+        &conn,
+        &replace_html_tags(&data.title),
+        &replace_html_tags(&data.body),
+        user.id,
+    )?;
+    Ok(Redirect::to(format!("/n/{}", note.seo_name)))
+}
+
 #[get("/n/<seo_name..>")]
-pub fn view_note(
+pub fn view(
     conn: MindmapDB,
     user: User,
     seo_name: PathBuf,
@@ -62,14 +50,8 @@ pub fn view_note(
     }
 }
 
-#[derive(Serialize)]
-pub struct ViewNoteModel {
-    pub note: Note,
-    pub links: Vec<NoteLink>,
-}
-
 #[get("/delete/<seo_name..>")]
-pub fn delete_note_preview(
+pub fn delete_preview(
     conn: MindmapDB,
     user: User,
     seo_name: PathBuf,
@@ -84,13 +66,8 @@ pub fn delete_note_preview(
     }
 }
 
-#[derive(Serialize)]
-pub struct DeletePreviewModel {
-    pub note: Note,
-}
-
 #[post("/delete/<seo_name..>", data = "<data>")]
-pub fn delete_note_submit(
+pub fn delete_submit(
     conn: MindmapDB,
     user: User,
     seo_name: PathBuf,
@@ -105,7 +82,64 @@ pub fn delete_note_submit(
         }
     }
 }
+#[get("/edit/<seo_name..>")]
+pub fn edit(
+    conn: MindmapDB,
+    user: User,
+    seo_name: PathBuf,
+) -> Result<Either<Template, Redirect>, failure::Error> {
+    let seo_name = get_seo_name_from_path(&seo_name);
+    match Note::load_by_seo_name(&conn, seo_name, user.id)? {
+        Some(note) => {
+            let model = EditNoteModel { note };
+            Ok(Either::Left(Template::render("edit_note", model)))
+        }
+        None => Ok(Either::Right(Redirect::to("/"))),
+    }
+}
 
+#[post("/edit/<seo_name..>", data = "<data>")]
+pub fn edit_submit(
+    conn: MindmapDB,
+    user: User,
+    seo_name: PathBuf,
+    data: Form<SaveNoteModel>,
+) -> Result<Either<Template, Redirect>, failure::Error> {
+    let seo_name = get_seo_name_from_path(&seo_name);
+    match Note::load_by_seo_name(&conn, seo_name, user.id)? {
+        Some(mut note) => {
+            note.update(
+                &conn,
+                &replace_html_tags(&data.title),
+                &replace_html_tags(&data.body),
+            )?;
+            Ok(Either::Right(Redirect::to(format!("/n/{}", note.seo_name))))
+        }
+        None => Ok(Either::Right(Redirect::to("/"))),
+    }
+}
+
+#[derive(Serialize)]
+pub struct DeletePreviewModel {
+    pub note: Note,
+}
+
+#[derive(Serialize)]
+pub struct EditNoteModel {
+    pub note: Note,
+}
+
+#[derive(FromForm, Debug)]
+pub struct SaveNoteModel {
+    pub title: String,
+    pub body: String,
+}
+
+#[derive(FromForm)]
+pub struct NewNote {
+    pub title: String,
+    pub body: String,
+}
 #[derive(FromForm, Debug)]
 pub struct DeleteSubmitModel {
     pub action: DeleteActionType,
@@ -129,50 +163,8 @@ impl<'v> FromFormValue<'v> for DeleteActionType {
     }
 }
 
-#[get("/edit/<seo_name..>")]
-pub fn edit_note(
-    conn: MindmapDB,
-    user: User,
-    seo_name: PathBuf,
-) -> Result<Either<Template, Redirect>, failure::Error> {
-    let seo_name = get_seo_name_from_path(&seo_name);
-    match Note::load_by_seo_name(&conn, seo_name, user.id)? {
-        Some(note) => {
-            let model = EditNoteModel { note };
-            Ok(Either::Left(Template::render("edit_note", model)))
-        }
-        None => Ok(Either::Right(Redirect::to("/"))),
-    }
-}
-
-#[post("/edit/<seo_name..>", data = "<data>")]
-pub fn edit_note_submit(
-    conn: MindmapDB,
-    user: User,
-    seo_name: PathBuf,
-    data: Form<SaveNoteModel>,
-) -> Result<Either<Template, Redirect>, failure::Error> {
-    let seo_name = get_seo_name_from_path(&seo_name);
-    match Note::load_by_seo_name(&conn, seo_name, user.id)? {
-        Some(mut note) => {
-            note.update(
-                &conn,
-                &replace_html_tags(&data.title),
-                &replace_html_tags(&data.body),
-            )?;
-            Ok(Either::Right(Redirect::to(format!("/n/{}", note.seo_name))))
-        }
-        None => Ok(Either::Right(Redirect::to("/"))),
-    }
-}
-
 #[derive(Serialize)]
-pub struct EditNoteModel {
+pub struct ViewNoteModel {
     pub note: Note,
-}
-
-#[derive(FromForm, Debug)]
-pub struct SaveNoteModel {
-    pub title: String,
-    pub body: String,
+    pub links: Vec<NoteLink>,
 }
