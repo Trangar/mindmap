@@ -1,5 +1,6 @@
 use crate::models::note::{Note as DatabaseNote, NoteHistory as DatabaseNoteHistory};
 use crate::models::note_link::NoteLink as DatabaseNoteLink;
+use crate::routes::SearchQuery;
 use chrono::{DateTime, Utc};
 use failure::format_err;
 use slug::slugify;
@@ -90,7 +91,7 @@ impl Note {
 
     pub fn search(
         conn: &diesel::PgConnection,
-        search: crate::SearchQuery,
+        search: SearchQuery,
         user_id: Uuid,
     ) -> Result<Vec<Note>, failure::Error> {
         Ok(DatabaseNote::search(conn, search, user_id)?

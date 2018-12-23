@@ -1,3 +1,4 @@
+use crate::routes::SearchQuery;
 use crate::schema::{note, note_history};
 use chrono::{DateTime, Utc};
 use diesel::prelude::*;
@@ -134,7 +135,7 @@ impl Note {
 
     pub fn search(
         conn: &diesel::PgConnection,
-        search_query: crate::SearchQuery,
+        search_query: SearchQuery,
         user_id: Uuid,
     ) -> Result<Vec<Note>, failure::Error> {
         fn sanitize(s: String) -> String {
