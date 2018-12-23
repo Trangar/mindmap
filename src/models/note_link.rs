@@ -63,6 +63,21 @@ impl NoteLink {
         Ok(first)
     }
 
+    pub fn delete_by_note(
+        conn: &diesel::PgConnection,
+        note_id: Uuid,
+    ) -> Result<(), failure::Error> {
+        diesel::delete(
+            note_link::table.filter(
+                note_link::dsl::left
+                    .eq(note_id)
+                    .or(note_link::dsl::right.eq(note_id)),
+            ),
+        )
+        .execute(conn)?;
+        Ok(())
+    }
+
     pub fn create(
         conn: &diesel::PgConnection,
         left: Uuid,

@@ -16,8 +16,10 @@ pub mod note;
 pub mod schema;
 pub mod user;
 
+use rocket::http::RawStr;
 use rocket::http::{Cookie, Cookies};
 use rocket::request::Form;
+use rocket::request::FromFormValue;
 use rocket::response::Redirect;
 use rocket_contrib::databases::diesel::PgConnection;
 use rocket_contrib::serve::StaticFiles;
@@ -66,7 +68,6 @@ fn main() {
             routes![
                 index,
                 index_not_logged_in,
-                // index_after_login,
                 login_submit,
                 logout,
                 register_submit,
@@ -79,6 +80,8 @@ fn main() {
                 edit_note_submit,
                 view_note,
                 view_note_history,
+                delete_note_preview,
+                delete_note_submit,
             ],
         )
         .mount("/", StaticFiles::from("static"))
@@ -299,6 +302,67 @@ fn view_note(
 struct ViewNoteModel {
     pub note: Note,
     pub links: Vec<NoteLink>,
+}
+
+#[get("/delete/<seo_name..>")]
+fn delete_note_preview(
+    conn: MindmapDB,
+    user: User,
+    seo_name: PathBuf,
+) -> Result<Either<Template, Redirect>, failure::Error> {
+    let seo_name = get_seo_name_from_path(&seo_name);
+    match Note::load_by_seo_name(&conn, seo_name, user.id)? {
+        Some(note) => {
+            let model = DeletePreviewModel { note };
+            Ok(Either::Left(Template::render("delete_preview", model)))
+        }
+        None => Ok(Either::Right(Redirect::to("/"))),
+    }
+}
+
+#[derive(Serialize)]
+struct DeletePreviewModel {
+    pub note: Note,
+}
+
+#[post("/delete/<seo_name..>", data = "<data>")]
+fn delete_note_submit(
+    conn: MindmapDB,
+    user: User,
+    seo_name: PathBuf,
+    data: Form<DeleteSubmitModel>,
+) -> Result<Redirect, failure::Error> {
+    match data.action {
+        DeleteActionType::Cancel => Ok(Redirect::to(format!("/n/{}", seo_name.to_str().unwrap()))),
+        DeleteActionType::Delete => {
+            let seo_name = get_seo_name_from_path(&seo_name);
+            Note::delete_by_seo_name(&conn, seo_name, user.id)?;
+            Ok(Redirect::to("/"))
+        }
+    }
+}
+
+#[derive(FromForm, Debug)]
+struct DeleteSubmitModel {
+    pub action: DeleteActionType,
+}
+
+#[derive(Debug)]
+pub enum DeleteActionType {
+    Cancel,
+    Delete,
+}
+
+impl<'v> FromFormValue<'v> for DeleteActionType {
+    type Error = &'v RawStr;
+
+    fn from_form_value(form_value: &'v RawStr) -> Result<DeleteActionType, &'v RawStr> {
+        match form_value.as_str() {
+            "cancel" => Ok(DeleteActionType::Cancel),
+            "delete" => Ok(DeleteActionType::Delete),
+            _ => Err(form_value),
+        }
+    }
 }
 
 #[get("/edit/<seo_name..>")]

@@ -35,6 +35,17 @@ pub struct NoteHistory {
     pub body: String,
 }
 
+impl NoteHistory {
+    pub fn delete_by_note(
+        conn: &diesel::PgConnection,
+        note_id: Uuid,
+    ) -> Result<(), failure::Error> {
+        diesel::delete(note_history::table.filter(note_history::dsl::note_id.eq(note_id)))
+            .execute(conn)?;
+        Ok(())
+    }
+}
+
 #[derive(Insertable)]
 #[table_name = "note_history"]
 pub struct InsertNoteHistory<'a> {
@@ -73,6 +84,11 @@ impl Note {
             .limit(10)
             .get_results(conn)
             .map_err(Into::into)
+    }
+
+    pub fn delete(conn: &diesel::PgConnection, id: Uuid) -> Result<(), failure::Error> {
+        diesel::delete(note::table.find(id)).execute(conn)?;
+        Ok(())
     }
 
     pub fn load_by_id(

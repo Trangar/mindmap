@@ -1,0 +1,15 @@
+{% extends "_note_layout" %}
+{% block inner_content %}
+    <h2>Deleting {{ note.title }}</h2>
+    <p>Are you sure? This action cannot be undone.</p>
+    <form action="/delete/{{ note.seo_name }}" method="POST">
+        <button type="submit" name="action" value="cancel" class="btn btn-success">
+            <span class="fas fa-chevron-left"></span>
+            Cancel
+        </button>
+        <button type="submit" name="action" value="delete" class="btn btn-danger">
+            <span class="fas fa-times"></span>
+            Delete
+        </button>
+    </form>
+{% endblock inner_content %}

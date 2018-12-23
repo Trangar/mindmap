@@ -11,6 +11,7 @@
             <div class="btn-group">
                 <a class="btn btn-info fas fa-history" href="/history/{{ note.seo_name }}"></a>
                 <a class="btn btn-success fas fa-pencil-alt" href="/edit/{{ note.seo_name }}"></a>
+                <a class="btn btn-danger fas fa-times" href="/delete/{{ note.seo_name }}"></a>
             </div>
         </div>
     </div>

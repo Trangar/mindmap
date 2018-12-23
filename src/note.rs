@@ -1,6 +1,7 @@
 use crate::models::note::{Note as DatabaseNote, NoteHistory as DatabaseNoteHistory};
 use crate::models::note_link::NoteLink as DatabaseNoteLink;
 use chrono::{DateTime, Utc};
+use failure::format_err;
 use slug::slugify;
 use uuid::Uuid;
 
@@ -88,6 +89,19 @@ impl Note {
             .into_iter()
             .map(Into::into)
             .collect())
+    }
+
+    pub fn delete_by_seo_name(
+        conn: &diesel::PgConnection,
+        name: &str,
+        user_id: Uuid,
+    ) -> Result<(), failure::Error> {
+        let note = Note::load_by_seo_name(conn, name, user_id)?
+            .ok_or_else(|| format_err!("Note not found"))?;
+        DatabaseNoteLink::delete_by_note(conn, note.id)?;
+        DatabaseNoteHistory::delete_by_note(conn, note.id)?;
+        DatabaseNote::delete(conn, note.id)?;
+        Ok(())
     }
 
     pub fn load_by_id(
