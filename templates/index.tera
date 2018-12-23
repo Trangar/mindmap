@@ -1,9 +1,54 @@
 {% extends "_note_layout" %}
 {% block inner_content %}
-<h2>Top 10 notes</h2>
-<ul class="list-unstyled">
-    {% for note in top_10_notes -%}
+<ul>
+    {% for note in notes -%}
         <li><a href="/n/{{ note.seo_name }}">{{note.title}}</a></li>
     {%- endfor %}
 </ul>
+{% if total_pages != 1 %}
+    <form action="/" method="GET">
+        <nav aria-label="Page navigation example">
+        <ul class="pagination">
+        {% if page > 1 %}
+            <li class="page-item">
+                <button type="submit" name="page" value="{{ page - 1}}" class="page-link">
+                    <span class="fas fa-chevron-left"></span>
+                    Back
+                </button>
+            </li>
+        {% endif %}
+            {% for index in range(from=max(left=1, right=page - 5), to=page) %}
+                <li class="page-item">
+                    <button type="submit" name="page" value="{{ index }}" class="page-link">
+                        {{ index }}
+                    </button>
+                </li>
+            {% endfor %}
+            <li class="page-item active">
+                <button type="submit" name="page" value="{{ page }}" class="page-link">
+                    {{ page }}
+                </button>
+            </li>
+        {% for index in range(from=page+1, to=min(left=page + 6, right=total_pages + 1)) %}
+            <li class="page-item">
+                <button type="submit" name="page" value="{{ index }}" class="page-link">
+                    {{ index }}
+                </button>
+            </li>
+        {% endfor %}
+        {% if page < total_pages %}
+            <li class="page-item">
+                <button type="submit" name="page" value="{{ page + 1}}" class="page-link">
+                    Next
+                    <span class="fas fa-chevron-right"></span>
+                </button>
+            </li>
+        {% endif %}
+
+        </ul>
+        Notes per page: <input type="text" name="count" size="3" value="{{notes_per_page}}" />
+        Total {{ total_pages }}
+        </nav>
+    </form>
+{% endif %}
 {% endblock inner_content %}

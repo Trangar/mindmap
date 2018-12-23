@@ -70,14 +70,22 @@ impl Link {
 }
 
 impl Note {
-    pub fn load_top_ten(
+    pub fn load_paged(
         conn: &diesel::PgConnection,
         user_id: Uuid,
+        start_index: u64,
+        count: u64,
     ) -> Result<Vec<Note>, failure::Error> {
-        Ok(DatabaseNote::load_top_10(conn, user_id)?
-            .into_iter()
-            .map(Into::into)
-            .collect())
+        Ok(
+            DatabaseNote::load_paged(conn, user_id, start_index as i64, count as i64)?
+                .into_iter()
+                .map(Into::into)
+                .collect(),
+        )
+    }
+
+    pub fn count_all(conn: &diesel::PgConnection, user_id: Uuid) -> Result<u64, failure::Error> {
+        DatabaseNote::count_by_user(conn, user_id).map(|count| count as u64)
     }
 
     pub fn search(

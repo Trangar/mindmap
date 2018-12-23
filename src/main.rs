@@ -67,6 +67,15 @@ fn main() {
             engine
                 .tera
                 .register_function("current_version", Box::new(crate::filters::current_version));
+            engine
+                .tera
+                .register_function("min", Box::new(crate::filters::min));
+            engine
+                .tera
+                .register_function("max", Box::new(crate::filters::max));
+            engine
+                .tera
+                .register_function("range", Box::new(crate::filters::range));
         }))
         .mount(
             "/",
@@ -99,6 +108,10 @@ mod filters {
     use serde_json::Value;
     use std::collections::HashMap;
 
+    fn fail<S: Into<String>, T>(f: S) -> Result<T, Error> {
+        Err(Error::from_kind(ErrorKind::Msg(f.into())))
+    }
+
     pub fn markdown_filter<S: std::hash::BuildHasher>(
         v: Value,
         _data: HashMap<String, Value, S>,
@@ -109,10 +122,47 @@ mod filters {
             html::push_html(&mut html_buf, parser);
             Ok(Value::String(html_buf))
         } else {
-            Err(Error::from_kind(ErrorKind::Msg(String::from(
-                "Value is not a valid string",
-            ))))
+            fail("Value is not a valid string")
         }
+    }
+
+    pub fn min<S: std::hash::BuildHasher>(map: HashMap<String, Value, S>) -> Result<Value, Error> {
+        if let (Some(Value::Number(left)), Some(Value::Number(right))) =
+            (map.get("left"), map.get("right"))
+        {
+            let left = left.as_i64().unwrap();
+            let right = right.as_i64().unwrap();
+            Ok(Value::Number(left.min(right).into()))
+        } else {
+            fail("Not implemented")
+        }
+    }
+
+    pub fn max<S: std::hash::BuildHasher>(map: HashMap<String, Value, S>) -> Result<Value, Error> {
+        if let (Some(Value::Number(left)), Some(Value::Number(right))) =
+            (map.get("left"), map.get("right"))
+        {
+            let left = left.as_i64().unwrap();
+            let right = right.as_i64().unwrap();
+            Ok(Value::Number(left.max(right).into()))
+        } else {
+            fail("Not implemented")
+        }
+    }
+
+    pub fn range<S: std::hash::BuildHasher>(
+        map: HashMap<String, Value, S>,
+    ) -> Result<Value, Error> {
+        let result = if let (Some(Value::Number(from)), Some(Value::Number(to))) =
+            (map.get("from"), map.get("to"))
+        {
+            from.as_i64().unwrap()..to.as_i64().unwrap()
+        } else {
+            return fail("Not implemented");
+        };
+        Ok(Value::Array(
+            result.map(|v| Value::Number(v.into())).collect(),
+        ))
     }
 
     pub fn current_version<S: std::hash::BuildHasher>(
@@ -124,18 +174,33 @@ mod filters {
 
 // Main page
 
-#[get("/", rank = 1)]
-fn index(conn: MindmapDB, user: User) -> Result<Template, failure::Error> {
-    let notes = Note::load_top_ten(&conn, user.id)?;
+#[get("/?<page>&<count>", rank = 1)]
+fn index(
+    conn: MindmapDB,
+    user: User,
+    page: Option<u64>,
+    count: Option<u64>,
+) -> Result<Template, failure::Error> {
+    let page = page.unwrap_or(1);
+    let count = count.unwrap_or(100);
+
+    let notes = Note::load_paged(&conn, user.id, (page - 1) * count, count)?;
+    let total_notes = Note::count_all(&conn, user.id)?;
     let model = IndexModel {
-        top_10_notes: notes,
+        notes: notes,
+        page,
+        total_pages: (total_notes / count) + 1,
+        notes_per_page: count,
     };
     Ok(Template::render("index", &model))
 }
 
 #[derive(Serialize)]
 pub struct IndexModel {
-    pub top_10_notes: Vec<Note>,
+    pub notes: Vec<Note>,
+    pub page: u64,
+    pub total_pages: u64,
+    pub notes_per_page: u64,
 }
 
 #[get("/", rank = 2)]

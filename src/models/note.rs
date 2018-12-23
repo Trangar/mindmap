@@ -70,9 +70,11 @@ impl<'a> InsertNoteHistory<'a> {
 }
 
 impl Note {
-    pub fn load_top_10(
+    pub fn load_paged(
         conn: &diesel::PgConnection,
         user_id: Uuid,
+        start: i64,
+        count: i64,
     ) -> Result<Vec<Note>, failure::Error> {
         note::table
             .filter(
@@ -81,8 +83,20 @@ impl Note {
                     .and(note::dsl::deleted.eq(false)),
             )
             .order(note::dsl::view_count.desc())
-            .limit(10)
+            .offset(start)
+            .limit(count)
             .get_results(conn)
+            .map_err(Into::into)
+    }
+
+    pub fn count_by_user(
+        conn: &diesel::PgConnection,
+        user_id: Uuid,
+    ) -> Result<i64, failure::Error> {
+        note::table
+            .filter(note::dsl::user_id.eq(user_id))
+            .count()
+            .get_result(conn)
             .map_err(Into::into)
     }
 
