@@ -25,7 +25,7 @@ features = ["diesel_postgres_pool", "tera_templates", "serve"]
 version = "0.4.0"
 
 [dependencies.uuid]
-version = "0.7" # dependent of diesel
+version = "0.8" # dependent of diesel
 features = ["serde", "v4"]
 
 [dependencies.chrono]
