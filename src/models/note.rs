@@ -161,7 +161,8 @@ impl Note {
                         format!("{} & {}", acc, s)
                     }
                 });
-        let mut query = String::from(r#"
+        let mut query = String::from(
+            r#"
 SELECT
     note_search.id,
     note_search.user_id,
@@ -183,7 +184,8 @@ FROM (
     FROM note
     WHERE note.user_id = $1
 ) note_search
-WHERE note_search.document @@ to_tsquery('english', $2)"#);
+WHERE note_search.document @@ to_tsquery('english', $2)"#,
+        );
 
         for exclude in search_query.excludes {
             let exclude = sanitize(exclude);
