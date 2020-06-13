@@ -140,7 +140,7 @@ impl Note {
         }
         let mut seo_name = seo_name_base.clone();
         let mut counter = 1;
-        while let Some(_) = DatabaseNote::load_by_seo_name(conn, &seo_name, user_id)? {
+        while DatabaseNote::load_by_seo_name(conn, &seo_name, user_id)?.is_some() {
             seo_name = format!("{}_{}", seo_name_base, counter);
             counter += 1;
         }
